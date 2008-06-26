@@ -253,40 +253,27 @@ var nawte = new Class({
 	},
 	
 	/*
-		Function: insertBefore
-			Insert text before the current selection. (This is a TextTransform method...)
+		Function: insert
+			Insert text before or after the current selection. (This is a TextTransform method...)
 			
 		Arguments: 
 			insertText - a string, the text to insert before the selection
+			where - a string, either "before" or "after" depending on where you want to insert
 			isLast - see information at the top
 			
 		Example:
-			>this.insertBefore("Hello ");
+			>this.insert("Hello ", 'before');
 			>//selection will become: Hello selection
 	*/
 	
-	insertBefore: function(insertText, isLast) {
+	insert: function(insertText, where, isLast) {
 		var isLast = (isLast == null) ? true : isLast;
-		this.el.replaceSelectedText(insertText + this.el.getSelectedText(), isLast);
+		where = (where == "") ? 'after' : where;
+		var newText = (where == "before") ? insertText + this.el.getSelectedText() : this.el.getSelectedText() + insertText;
+		this.el.replaceSelectedText(newText, isLast);
 	},
 	
-	/*
-		Function: insertAfter
-			Insert text after the current selection. (This is a TextTransform method...)
-			
-		Arguments: 
-			insertText - a string, the text to insert after the selection
-			isLast - see information at the top
-			
-		Example:
-			>this.insertAfter(" Hello");
-			>//selection will become: selection Hello
-	*/
 	
-	insertAfter: function(insertText, isLast) {
-		var isLast = (isLast == null) ? true : isLast;
-		this.el.replaceSelectedText(this.el.getSelectedText() + insertText, isLast);
-	},
 	
 	/*
 		Function: replaceSelection
