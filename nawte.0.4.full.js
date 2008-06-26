@@ -1,8 +1,8 @@
-Element.extend({
+Element.implement({
 	
 	getSelectedText: function() {
-		if(window.ie) return document.selection.createRange().text;
-		return this.getValue().substring(this.selectionStart, this.selectionEnd);
+		if(Browser.Engine.trident) return document.selection.createRange().text;
+		return this.get('value').substring(this.selectionStart, this.selectionEnd);
 	},
 	
 	replaceSelectedText: function(newtext, isLast) {
@@ -10,7 +10,7 @@ Element.extend({
 		
 		var scroll_top = this.scrollTop;
 		
-		if(window.ie) {
+		if(Browser.Engine.trident) {
 			this.focus();
 			var range = document.selection.createRange();
 			range.text = newtext;
@@ -23,7 +23,7 @@ Element.extend({
 		else {
 			originalStart = this.selectionStart;
 			originalEnd = this.selectionEnd;
-			this.value = this.value.substring(0, originalStart) + newtext + this.value.substring(originalEnd);
+			this.value = this.get('value').substring(0, originalStart) + newtext + this.get('value').substring(originalEnd);
 			if(isLast == false) {
 				this.setSelectionRange(originalStart, originalStart + newtext.length);
 			}
@@ -37,6 +37,7 @@ Element.extend({
 		
 	}
 });
+
 
 /*
 	Class: nawte
@@ -105,7 +106,14 @@ Element.extend({
 */
 
 var nawte = new Class({
+
+	Implements: Options,
 	
+	options: {
+		displatchChangeEvent: false,
+		changeEventDelay: 200,
+		interceptTabs: true
+	},
 	/*
 		Constructor: nawte (constructor)
 			Creates a new nawte object.
@@ -141,13 +149,10 @@ var nawte = new Class({
 			(end)
 	*/
 	initialize: function(element, list, options) {
+		
 		this.el = $(element);
 		
-		this.options = Object.extend({
-			dispatchChangeEvent: false,
-			changeEventDelay: 200,
-			interceptTabs: true
-		}, options || {});
+		this.setOptions(options);
 		
 		if(this.options.dispatchChangeEvent) {
 			this.el.addEvents({
@@ -161,6 +166,7 @@ var nawte = new Class({
 			});
 		}	
 		if(this.options.interceptTabs) {
+			
 			this.el.addEvent('keypress', function(event){
 				var event = new Event(event);
 				if(event.key == "tab") {
@@ -168,18 +174,19 @@ var nawte = new Class({
 					this.replaceSelection("\t");
 				}
 			}.bind(this));
+			
 		}
 		
 
 		if(! $defined(list) || list == "") {
 			list = new Element('li');
-			list.injectBefore(this.el);
+			list.inject(this.el, 'before');
 			this.list = list;
 		}
 		else {
 			this.list = $(list);
 		}
-		this.oldContent = this.el.value;
+		this.oldContent = this.el.get('value');
 		
 		
 	},
@@ -208,8 +215,8 @@ var nawte = new Class({
 	*/
 	
 	watchChange: function() {
-		if(this.oldContent != this.el.value) {
-			this.oldContent = this.el.value;
+		if(this.oldContent != this.el.get('value')) {
+			this.oldContent = this.el.get('value');
 			this.el.fireEvent('change');
 		}
 	},
@@ -341,8 +348,9 @@ var nawte = new Class({
 		Example:
 			>var content = this.getValue();
 	*/
+				
 	getValue: function() {
-		return this.el.value;
+		return this.el.get('value');
 	},
 	
 	/*
@@ -357,7 +365,7 @@ var nawte = new Class({
 	*/
 	
 	setValue: function(text) {
-		this.el.setProperty('value', text);
+		this.el.set('value', text);
 		this.el.focus();
 	},
 	
@@ -402,9 +410,10 @@ var nawte = new Class({
 			},
 			'href': '#'
 		});
-		itemlink.setHTML('<span>' + name + '</span>');
+		itemlink.set('html', '<span>' + name + '</span>');
 		itemlink.setProperties(args || {});
-		itemlink.injectInside(item);
+		itemlink.inject(item, 'bottom');
 		item.injectInside(this.list);
 	}
+	
 });
